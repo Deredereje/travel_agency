@@ -1,4 +1,4 @@
-const API_URL = "https://travel-backend.onrender.com"; // 👈 CHANGE THIS
+const API_URL = "https://travel-agency-k1f9.onrender.com"; // 👈 CHANGE THIS
 
 document.getElementById("contactForm").addEventListener("submit", async function(e) {
   e.preventDefault();
