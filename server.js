@@ -9,7 +9,7 @@ const app = express();
 
 // ===== Middleware =====
 app.use(cors({
-  origin: "*", // For testing, allow all frontends. Replace with your frontend URL for production
+  origin: "https://www.naturalplustour.com", // For testing, allow all frontends. Replace with your frontend URL for production
   methods: ["GET", "POST"]
 }));
 app.use(express.json());
