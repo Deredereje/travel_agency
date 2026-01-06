@@ -1,0 +1,35 @@
+{
+  "dependencies": {
+    "@formspree/react": "^3.0.0",
+    "axios": "^1.13.2",
+    "body-parser": "^2.2.1",
+    "bootstrap": "^5.3.8",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "lucide-react": "^0.561.0",
+    "mongodb": "^7.0.0",
+    "mongoose": "^9.0.2",
+    "nodemailer": "^7.0.12",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "name": "travel-web",
+  "version": "1.0.0",
+  "description": "<<<<<<< HEAD\r # travel-web\r Travel agency website\r =======\r # Travel-Agency\r >>>>>>> 80c47171ebcf7b12d6cb49c235a4f6fc7b42168f",
+  "main": "javascript.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Deredereje/Travel-Agency.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Deredereje/Travel-Agency/issues"
+  },
+  "homepage": "https://github.com/Deredereje/Travel-Agency#readme"
+}
