@@ -7,14 +7,16 @@ require("dotenv").config();
 
 const app = express();
 
-// ===== Middleware =====
-// ✅ CORS FIRST
+// ✅ CORS FIRST (NO app.options)
 app.use(cors({
-  origin: "https://www.natureplustour.com",
-  methods: ["GET", "POST", "OPTIONS"],
+  origin: [
+    "https://www.natureplustour.com",
+    "https://natureplustour.com"
+  ],
+  methods: ["GET", "POST"],
   allowedHeaders: ["Content-Type"]
 }));
-app.options("*", cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
