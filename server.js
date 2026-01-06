@@ -7,7 +7,7 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ CORS FIRST (NO app.options)
+// ===== CORS =====
 app.use(cors({
   origin: [
     "https://www.natureplustour.com",
@@ -20,12 +20,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ===== MongoDB Atlas Connection =====
+// ===== MongoDB Atlas =====
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Atlas Connected ✅"))
   .catch(err => console.error("MongoDB connection error ❌", err));
 
-// ===== Schema + Model =====
+// ===== Schema =====
 const formSchema = new mongoose.Schema({
   whereTo: String,
   howMany: String,
@@ -33,68 +33,80 @@ const formSchema = new mongoose.Schema({
   leaving: String,
   name: String,
   email: String,
-  phone: String,
-  finaldestination: String
+  phone: String
 });
 
 const FormData = mongoose.model("FormData", formSchema);
 
-// ===== Nodemailer setup =====
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER, // Gmail account
-    pass: process.env.EMAIL_PASS  // Gmail App Password
-  }
-});
+// ===== Nodemailer (SAFE) =====
+let transporter;
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    }
+  });
+  console.log("Email service ready ✅");
+} else {
+  console.log("Email service skipped ⚠️ (missing env vars)");
+}
 
 // ===== Test route =====
 app.get("/", (req, res) => {
   res.send("Backend is running ✅");
 });
 
-// ===== Save form and send email =====
+// ===== Save form =====
 app.post("/save", async (req, res) => {
-  const { whereTo, howMany, arrivals, leaving, name, email, phone } = req.body;
-  console.log("Received data:", req.body);
-
   try {
-    // Save to MongoDB
-    await FormData.create({ whereTo, howMany, arrivals, leaving, name, email, phone });
+    console.log("Received data:", req.body);
 
-    // Send email to admin
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER,
-      subject: `New Travel Booking from ${name}`,
-      text: `
-Where To: ${whereTo}
-How Many: ${howMany}
-Arrivals: ${arrivals}
-Leaving: ${leaving}
-Name: ${name}
-Email: ${email}
-Phone: ${phone}`
-    });
+    // 1️⃣ Save to MongoDB
+    const saved = await FormData.create(req.body);
+    console.log("Saved to DB ✅", saved._id);
 
-    // Send confirmation to user
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Booking Confirmation",
-      html: `<h3>Hello ${name}</h3><p>Your booking is confirmed!</p>`
-    });
+    // 2️⃣ Respond FIRST (important)
+    res.status(200).json({ message: "Booking saved successfully" });
 
-    console.log("Booking saved & emails sent ✅");
-    res.status(200).json({ message: "Your data is saved and email sent!" });
+    // 3️⃣ Send emails (NON-BLOCKING)
+    if (transporter) {
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: process.env.EMAIL_USER,
+          subject: `New Travel Booking from ${req.body.name}`,
+          text: `
+Where To: ${req.body.whereTo}
+How Many: ${req.body.howMany}
+Arrivals: ${req.body.arrivals}
+Leaving: ${req.body.leaving}
+Name: ${req.body.name}
+Email: ${req.body.email}
+Phone: ${req.body.phone}`
+        });
+
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: req.body.email,
+          subject: "Booking Confirmation",
+          html: `<h3>Hello ${req.body.name}</h3><p>Your booking is confirmed!</p>`
+        });
+
+        console.log("Emails sent ✅");
+      } catch (emailErr) {
+        console.error("Email error ⚠️", emailErr.message);
+      }
+    }
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("SAVE ERROR ❌", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ===== Start server on Render port =====
+// ===== Start server =====
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
