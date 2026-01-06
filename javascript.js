@@ -18,28 +18,45 @@ document.getElementById("contactForm").addEventListener("submit", async function
 
   const data = { whereTo, howMany, arrivals, leaving, name, email, phone };
 
-  try {
-    const res = await fetch(`${API_URL}/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+ try {
+  const res = await fetch(`${API_URL}/save`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 
-    const result = await res.json();
-    console.log("Response from server:", result);
-
-    document.getElementById("contactForm").reset();
-
-    const msgDiv = document.getElementById("successMessage");
-    msgDiv.innerText = "Booking submitted successfully!";
-    msgDiv.style.display = "block";
-
-    setTimeout(() => {
-      msgDiv.style.display = "none";
-    }, 5000);
-
-  } catch (err) {
-    console.error(err);
-    alert("Error sending booking. Please try again.");
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText);
   }
+
+  const result = await res.json();
+  console.log("Server response:", result);
+
+  document.getElementById("contactForm").reset();
+  alert("Booking submitted successfully!");
+
+} catch (err) {
+  console.error("Booking error:", err);
+  alert(err.message || "Failed to send booking");
+}
+
 });
+
+window.toggleReadMore = function () {
+  const dots = document.getElementById("dots");
+  const moreText = document.getElementById("more-text");
+  const btn = document.getElementById("about-btn");
+
+  if (dots.style.display === "none") {
+    dots.style.display = "inline";
+    moreText.style.display = "none";
+    btn.innerText = "Read more";
+  } else {
+    dots.style.display = "none";
+    moreText.style.display = "inline";
+    btn.innerText = "Read less";
+  }
+  
+};
+
